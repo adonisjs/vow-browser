@@ -11,6 +11,7 @@
 
 const test = require('japa')
 const http = require('http')
+const nodeCookie = require('node-cookie')
 const puppeteer = require('puppeteer')
 const RequestManager = require('../../src/Browser/Request')
 const ResponseManager = require('../../src/Browser/Response')
@@ -49,6 +50,21 @@ test.group('Response', (group) => {
 
     const res = await request.end()
     assert.equal(res.status, 200)
+    server.close()
+  })
+
+  test('get cookies as an array', async (assert) => {
+    const server = http.createServer((req, res) => {
+      nodeCookie.create(res, 'username', 'virk', { sameSite: true })
+      nodeCookie.create(res, 'age', '22', { sameSite: true })
+      res.end('done')
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL)
+
+    const res = await request.end()
+    assert.deepEqual(res.headers['set-cookie'], ['username=virk; SameSite=Strict', 'age=22; SameSite=Strict'])
     server.close()
   })
 

@@ -70,6 +70,10 @@ module.exports = function (BaseResponse) {
      */
     async updateResponse (response) {
       this.status = response.status
+      const setCookieHeader = response.headers['set-cookie']
+      if (typeof (setCookieHeader) === 'string' && setCookieHeader) {
+        response.headers['set-cookie'] = setCookieHeader.split('\n')
+      }
       this.updateHeaders(response.headers)
       this.text = await this.getText()
     }
