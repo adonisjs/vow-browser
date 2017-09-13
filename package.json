@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "standard",
     "pretest": "npm run lint",
-    "test:local": "japa --bail",
+    "test:local": "japa --timeout=0",
     "test": "npm run test:local",
     "test:win": "node ./node_modules/japa-cli/index.js"
   },
