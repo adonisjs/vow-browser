@@ -28,15 +28,16 @@ class Browser {
    *
    * @param  {String}   url
    * @param  {Function} callback
+   * @param  {Object}   options
    *
    * @return {BrowserResponse}
    */
-  async visit (url, callback) {
+  async visit (url, callback, options) {
     const request = new this.Request(this._browser, url, this._assert)
     if (typeof (callback) === 'function') {
       callback(request)
     }
-    return request.end()
+    return request.end(options)
   }
 
   /**

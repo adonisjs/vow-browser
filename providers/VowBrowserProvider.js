@@ -16,7 +16,8 @@ class BrowserProvider extends ServiceProvider {
     this.app.bind('Test/Browser', () => {
       const BrowsersJar = require('../src/Browser/BrowsersJar')
 
-      return function ({ Context, Request, Response }) {
+      return function ({ Context, Request, Response }, launchOptions) {
+        BrowsersJar.launchOptions = launchOptions
         Context.getter('browser', function () {
           return new BrowsersJar(Request, Response, this.assert)
         }, true)

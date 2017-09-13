@@ -10,6 +10,37 @@
 */
 
 const ActionsChain = require('./ActionsChain')
+const { URL } = require('url')
+
+const proxyHandler = {
+  get (target, name) {
+    /**
+     * if node is inspecting then stick to target properties
+     */
+    if (typeof (name) === 'symbol' || name === 'inspect') {
+      return target[name]
+    }
+
+    /**
+     * Since this class is returned as part of await, recursively
+     * `then` is executed, so we need to return undefined to
+     * end the recursive chain.
+     */
+    if (name === 'then') {
+      return undefined
+    }
+
+    /**
+     * if value exists on target, return that
+     */
+    if (typeof (target[name]) !== 'undefined') {
+      return target[name]
+    }
+
+    const chain = target.chain()
+    return chain[name].bind(chain)
+  }
+}
 
 module.exports = function (BaseResponse) {
   /**
@@ -33,12 +64,13 @@ module.exports = function (BaseResponse) {
        */
       super(assert, {})
       this._page = page
+      return new Proxy(this, proxyHandler)
     }
 
     /**
      * Body is same as text
      *
-     * @method body
+     * @attribute body
      *
      * @return {String}
      */
@@ -49,7 +81,7 @@ module.exports = function (BaseResponse) {
     /**
      * An array of request redirects
      *
-     * @method redirects
+     * @attribute redirects
      *
      * @return {Array}
      */
@@ -58,8 +90,9 @@ module.exports = function (BaseResponse) {
     }
 
     /**
-     * Updates the response to the current response
-     * object on the page.
+     * Since a browser page moves between page, we keep
+     * on updating the response to make sure we have
+     * the latest `content` and `headers`.
      *
      * @method updateResponse
      * @async
@@ -69,54 +102,35 @@ module.exports = function (BaseResponse) {
      * @return {void}
      */
     async updateResponse (response) {
+      if (!response) {
+        return
+      }
+
       this.status = response.status
+
       const setCookieHeader = response.headers['set-cookie']
       if (typeof (setCookieHeader) === 'string' && setCookieHeader) {
         response.headers['set-cookie'] = setCookieHeader.split('\n')
       }
       this.updateHeaders(response.headers)
+
       this.text = await this.getText()
+      return this
     }
 
     /**
-     * Evaluate a function in browser context
-     *
-     * @method $eval
-     *
-     * @param  {...spread} args
-     *
-     * @return {String}
-     */
-    $eval (...args) {
-      return this._page.$eval(...args)
-    }
-
-    /**
-     * Evaluate a function in browser context
-     *
-     * @method evaluate
-     *
-     * @param  {...spread} args
-     *
-     * @return {String}
-     */
-    evaluate (...args) {
-      return this._page.evaluate(...args)
-    }
-
-    /**
-     * Returns the current page response text
+     * Returns the current page response text, or
+     * text of a selector.
      *
      * @method getText
      * @async
      *
+     * @param {Selector} [selector]
+     *
      * @return {String}
      */
     getText (selector) {
-      if (!selector) {
-        return this._page.plainText()
-      }
-      return this.$eval(selector, (e) => e.innerText)
+      return selector ? this._page.$eval(selector, (e) => e.innerText) : this._page.plainText()
     }
 
     /**
@@ -126,29 +140,56 @@ module.exports = function (BaseResponse) {
      * @method getHtml
      * @async
      *
-     * @param  {String} [selector]
+     * @param  {Selector} [selector]
      *
      * @return {String}
      */
     getHtml (selector) {
-      if (!selector) {
-        return this._page.content()
-      }
-      return this.$eval(selector, (e) => e.innerHTML)
+      return selector ? this._page.$eval(selector, (e) => e.innerHTML) : this._page.content()
+    }
+
+    /**
+     * Returns page title
+     *
+     * @method getTitle
+     * @async
+     *
+     * @return {String}
+     */
+    getTitle () {
+      return this._page.title()
     }
 
     /**
      * Returns a boolean indicating if a checkbox
-     * is checked or not
+     * is checked or not.
      *
      * @method isChecked
+     * @async
+     *
+     * @param  {Selector}  selector
+     *
+     * @return {Boolean}
+     */
+    isChecked (selector) {
+      return this._page.$eval(selector, (e) => e.checked)
+    }
+
+    /**
+     * Returns a boolean on whether an element is visible
+     * or not
+     *
+     * @method isVisible
      *
      * @param  {String}  selector
      *
      * @return {Boolean}
      */
-    isChecked (selector) {
-      return this.$eval(selector, (e) => e.checked)
+    isVisible (selector) {
+      return this._page.$eval(selector, (e) => {
+        const styles = document.defaultView.getComputedStyle(e, null)
+        return styles['opacity'] !== '0' && styles['display'] !== 'none' && styles['visibility'] !== 'hidden'
+      })
     }
 
     /**
@@ -157,17 +198,21 @@ module.exports = function (BaseResponse) {
      * @method getValue
      * @async
      *
-     * @param  {String} selector
+     * @param  {Selector} selector
      *
      * @return {String}
      */
     getValue (selector) {
-      return this.evaluate((s) => {
+      return this._page.evaluate((s) => {
         const nodes = document.querySelectorAll(s)
         if (!nodes.length) {
           throw new Error('Node not found')
         }
 
+        /**
+         * Return value of the selected radio box, if
+         * node is a radio button
+         */
         if (nodes[0].type === 'radio') {
           let checkedValue = null
           for (const item of nodes) {
@@ -179,25 +224,68 @@ module.exports = function (BaseResponse) {
           return checkedValue
         }
 
+        /**
+         * Otherwise return first node value
+         */
         return nodes[0].value
       }, selector)
     }
 
     /**
-     * Returns value for a given attribute
+     * Returns value for a given attribute.
      *
      * @method getAttribute
      * @async
      *
-     * @param  {String}     selector
-     * @param  {String}     attribute
+     * @param  {Selector}     selector
+     * @param  {String}       attribute
      *
      * @return {String}
      */
     getAttribute (selector, attribute) {
-      return this.$eval(selector, (e, attr) => {
-        return e.getAttribute(attr)
-      }, attribute)
+      return this._page.$eval(selector, (e, attr) => e.getAttribute(attr), attribute)
+    }
+
+    /**
+     * Returns path for the current url
+     *
+     * @method getPath
+     *
+     * @return {String}
+     */
+    getPath () {
+      return new URL(this._page.url()).pathname
+    }
+
+    /**
+     * Get query string
+     *
+     * @method getQueryParams
+     *
+     * @return {String}
+     */
+    getQueryParams () {
+      const params = new URL(this._page.url()).searchParams
+      const paramsHash = {}
+
+      for (const [name, value] of params) {
+        paramsHash[name] = value
+      }
+
+      return paramsHash
+    }
+
+    /**
+     * Returns value for a given key from query params
+     *
+     * @method getQueryParam
+     *
+     * @param  {String}      key
+     *
+     * @return {String}
+     */
+    getQueryParam (key) {
+      return this.getQueryParams()[key]
     }
 
     /**
@@ -206,12 +294,12 @@ module.exports = function (BaseResponse) {
      * @method getAttributes
      * @async
      *
-     * @param  {String}      selector
+     * @param  {Selector}      selector
      *
      * @return {Object}
      */
     getAttributes (selector) {
-      return this.$eval(selector, (e, attr) => {
+      return this._page.$eval(selector, (e, attr) => {
         const attrsMap = e.attributes
         const attrs = {}
         for (let i = 0; i < attrsMap.length; i++) {
@@ -220,6 +308,35 @@ module.exports = function (BaseResponse) {
         }
         return attrs
       })
+    }
+
+    /**
+     * Returns a boolean indicating whether an element
+     * exists or not.
+     *
+     * @method hasElement
+     * @async
+     *
+     * @param  {String}   selector
+     *
+     * @return {Boolean}
+     */
+    hasElement (selector) {
+      return this._page.evaluate((s) => !!document.querySelector(s), selector)
+    }
+
+    /**
+     * Returns reference to an element
+     *
+     * @method getElement
+     * @async
+     *
+     * @param  {Selector}   selector
+     *
+     * @return {Object}
+     */
+    getElement (selector) {
+      return this._page.$(selector)
     }
 
     /**
@@ -232,51 +349,6 @@ module.exports = function (BaseResponse) {
      */
     chain () {
       return new ActionsChain(this)
-    }
-
-    /**
-     * Asserts that body has certain text available
-     *
-     * @method assertHas
-     *
-     * @param  {String}  expected
-     *
-     * @return {void}
-     */
-    async assertHas (expected) {
-      const actual = await this.getText()
-      this._assert.include(actual, expected)
-    }
-
-    /**
-     * Assert a certain element has given text
-     *
-     * @method assertHasIn
-     *
-     * @param  {String}    selector
-     * @param  {String}    expected
-     *
-     * @return {void}
-     */
-    async assertHasIn (selector, expected) {
-      const actual = await this.getText(selector)
-      this._assert.include(actual, expected)
-    }
-
-    /**
-     * Asserts a selector attribute value
-     *
-     * @method assertAttribute
-     *
-     * @param  {String}        selector
-     * @param  {String}        attribute
-     * @param  {String}        expected
-     *
-     * @return {void}
-     */
-    async assertAttribute (selector, attribute, expected) {
-      const actual = await this.getAttribute(selector, attribute)
-      this._assert.equal(actual, expected)
     }
   }
 
