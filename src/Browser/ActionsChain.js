@@ -276,10 +276,11 @@ class ActionsChain {
    * @chainable
    */
   waitForNavigation () {
-    this._actions.push(() => {
-      return this._res._page.waitForNavigation().then((response) => {
-        return this._res.updateResponse(response)
-      })
+    this._actions.push(async () => {
+      const response = await this._res._page.waitForNavigation()
+      console.log(response)
+      console.log(this._res._page.mainFrame().url())
+      await this._res.updateResponse(response)
     })
     return this
   }
