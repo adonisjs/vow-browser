@@ -64,18 +64,9 @@ module.exports = function (BaseResponse) {
        */
       super(assert, {})
       this._page = page
-      return new Proxy(this, proxyHandler)
-    }
+      page.on('response', (res) => this.updateResponse(res))
 
-    /**
-     * Body is same as text
-     *
-     * @attribute body
-     *
-     * @return {String}
-     */
-    get body () {
-      return this.text
+      return new Proxy(this, proxyHandler)
     }
 
     /**
@@ -92,30 +83,26 @@ module.exports = function (BaseResponse) {
     /**
      * Since a browser page moves between page, we keep
      * on updating the response to make sure we have
-     * the latest `content` and `headers`.
+     * the latest `headers`.
      *
      * @method updateResponse
-     * @async
      *
      * @param  {Object}       response
      *
      * @return {void}
      */
-    async updateResponse (response) {
+    updateResponse (response) {
       if (!response) {
         return
       }
 
       this.status = response.status
-
       const setCookieHeader = response.headers['set-cookie']
       if (typeof (setCookieHeader) === 'string' && setCookieHeader) {
         response.headers['set-cookie'] = setCookieHeader.split('\n')
       }
-      this.updateHeaders(response.headers)
 
-      this.text = await this.getText()
-      return this
+      this.updateHeaders(response.headers)
     }
 
     /**

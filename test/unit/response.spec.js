@@ -97,7 +97,7 @@ test.group('Response', (group) => {
 
     const res = await request.end()
 
-    assert.equal(res.body, 'done')
+    assert.equal(await res.getText(), 'done')
   })
 
   test('get response headers on redirect', async (assert) => {
@@ -136,7 +136,7 @@ test.group('Response', (group) => {
 
     const res = await request.end()
 
-    assert.equal(res.body, 'reached there')
+    assert.equal(await res.getText(), 'reached there')
   })
 })
 
