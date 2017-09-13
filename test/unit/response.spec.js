@@ -10,6 +10,7 @@
 */
 
 const test = require('japa')
+const fs = require('fs-extra')
 const http = require('http')
 const path = require('path')
 const nodeCookie = require('node-cookie')
@@ -684,6 +685,50 @@ test.group('Page interactions', (group) => {
     await res
       .attach('[name="pic"]', [path.join(__dirname, './request.spec.js'), path.join(__dirname, './response.spec.js')])
       .assertHasIn('.file-name', 'request.spec.js,response.spec.js')
+  })
+
+  test('take interim screenshots', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+        <select name="gender">
+          <option value="male"> Male </option>
+          <option value="female"> Female </option>
+        </select>
+
+        <input type="text" name="gender-value">
+        <button> Select </button>
+
+        <script>
+           document.querySelector('button').addEventListener('click', function () {
+             const val = document.querySelector('[name="gender-value"]').value
+             const option = document.querySelector(\`[name="gender"] [value^="$\{val}"]\`)
+
+             if (option) {
+               option.selected = true
+             }
+           })
+        </script>
+      `)
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res
+      .type('[name="gender-value"]', 'female')
+      .screenshot('type.png')
+      .click('button')
+      .screenshot('select.png')
+      .assertValue('[name="gender"]', 'female')
+
+    assert.isTrue(await fs.exists(path.join(process.cwd(), 'select.png')))
+    assert.isTrue(await fs.exists(path.join(process.cwd(), 'type.png')))
+
+    await fs.remove(path.join(process.cwd(), 'select.png'))
+    await fs.remove(path.join(process.cwd(), 'type.png'))
   })
 })
 

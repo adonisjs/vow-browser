@@ -19,6 +19,7 @@
     "@adonisjs/sink": "^1.0.13",
     "coveralls": "^2.13.1",
     "cz-conventional-changelog": "^2.0.0",
+    "fs-extra": "^4.0.2",
     "japa": "^1.0.4",
     "japa-cli": "^1.0.1",
     "macroable": "^1.0.0",

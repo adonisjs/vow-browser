@@ -413,6 +413,22 @@ class ActionsChain {
   }
 
   /**
+   * Take screenshot of current state
+   *
+   * @method screenshot
+   *
+   * @param  {String}   path
+   * @param  {Object}   [options]
+   *
+   * @chainable
+   */
+  screenshot (path, options) {
+    const clonedOptions = Object.assign({}, options, { path })
+    this._actions.push(() => this._res._page.screenshot(clonedOptions))
+    return this
+  }
+
+  /**
    * Assert body has the given text
    *
    * @method assertHas
