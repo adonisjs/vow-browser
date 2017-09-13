@@ -337,6 +337,19 @@ module.exports = function (BaseResponse) {
     chain () {
       return new ActionsChain(this)
     }
+
+    /**
+     * Overriding base response assert body, so it
+     * needs to be on this class, but calls
+     * the assert method on actions chain
+     *
+     * @method assertBody
+     *
+     * @return {void}
+     */
+    assertBody (expected) {
+      return this.chain().assertBody(expected)
+    }
   }
 
   return BrowserResponse

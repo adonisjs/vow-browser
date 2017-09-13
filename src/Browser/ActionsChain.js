@@ -684,6 +684,14 @@ class ActionsChain {
     return this
   }
 
+  assertBody (expected) {
+    this._actions.push(async () => {
+      const actual = await this._res.getText()
+      this._res._assert.equal(actual, expected)
+    })
+    return this
+  }
+
   /**
    * When promise is resolved
    *
