@@ -147,8 +147,8 @@ test.group('Page interactions', (group) => {
   })
 
   group.afterEach(async () => {
-    this.server.close()
     await this.browser.close()
+    this.server.close()
   })
 
   group.beforeEach(() => {
@@ -739,8 +739,8 @@ test.group('Assertions', (group) => {
   })
 
   group.afterEach(async () => {
-    this.server.close()
     await this.browser.close()
+    this.server.close()
   })
 
   group.beforeEach(() => {
