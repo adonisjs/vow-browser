@@ -6,25 +6,21 @@
   "scripts": {
     "lint": "standard",
     "pretest": "npm run lint",
-    "posttest": "npm run coverage",
     "test:local": "japa --bail",
-    "test": "nyc npm run test:local",
-    "test:win": "node ./node_modules/japa-cli/index.js",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "test": "npm run test:local",
+    "test:win": "node ./node_modules/japa-cli/index.js"
   },
   "author": "",
   "license": "MIT",
   "devDependencies": {
     "@adonisjs/fold": "^4.0.2",
     "@adonisjs/sink": "^1.0.13",
-    "coveralls": "^2.13.1",
     "cz-conventional-changelog": "^2.0.0",
     "fs-extra": "^4.0.2",
     "japa": "^1.0.4",
     "japa-cli": "^1.0.1",
     "macroable": "^1.0.0",
     "node-cookie": "^2.0.2",
-    "nyc": "^11.1.0",
     "standard": "^10.0.3"
   },
   "dependencies": {
