@@ -33,6 +33,12 @@ class Browser {
    * @return {BrowserResponse}
    */
   async visit (url, callback, options) {
+    /**
+     * if url is absolute, then use it, otherwise prefix
+     * TEST_SERVER_URL
+     */
+    url = /^http(s)?/.test(url) ? url : `${process.env.TEST_SERVER_URL}${url}`
+
     const request = new this.Request(this._browser, url, this._assert)
     if (typeof (callback) === 'function') {
       callback(request)

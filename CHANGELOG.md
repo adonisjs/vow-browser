@@ -1,3 +1,20 @@
+<a name="1.0.1"></a>
+## [1.0.1](https://github.com/adonisjs/vow-browser/compare/v1.0.0...v1.0.1) (2017-09-15)
+
+
+### Bug Fixes
+
+* **browser:** browser.visit prepend server url ([791dfb3](https://github.com/adonisjs/vow-browser/commit/791dfb3))
+* **response:** proxy only call .bind when accessor is a function ([b4d2437](https://github.com/adonisjs/vow-browser/commit/b4d2437))
+* **response:** store responses next to urls ([9d757d6](https://github.com/adonisjs/vow-browser/commit/9d757d6))
+
+
+### Features
+
+* **response:** add option to close the page ([b6e19bd](https://github.com/adonisjs/vow-browser/commit/b6e19bd))
+
+
+
 <a name="1.0.0"></a>
 # 1.0.0 (2017-09-15)
 
