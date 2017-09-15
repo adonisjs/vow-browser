@@ -39,7 +39,11 @@ const proxyHandler = {
     }
 
     const chain = target.chain()
-    return chain[name].bind(chain)
+    if (typeof (chain[name]) === 'function') {
+      return chain[name].bind(chain)
+    }
+
+    return chain[name]
   }
 }
 
