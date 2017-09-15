@@ -354,6 +354,18 @@ module.exports = function (BaseResponse) {
     }
 
     /**
+     * Closes the current page
+     *
+     * @method close
+     * @async
+     *
+     * @return {void}
+     */
+    close () {
+      return this._page.close()
+    }
+
+    /**
      * Overriding base response assert body, so it
      * needs to be on this class, but calls
      * the assert method on actions chain
