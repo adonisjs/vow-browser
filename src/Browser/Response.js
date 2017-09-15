@@ -11,6 +11,7 @@
 
 const ActionsChain = require('./ActionsChain')
 const { URL } = require('url')
+const debug = require('debug')('adonis:vow:browser')
 
 const proxyHandler = {
   get (target, name) {
@@ -64,7 +65,12 @@ module.exports = function (BaseResponse) {
        */
       super(assert, {})
       this._page = page
-      page.on('response', (res) => this.updateResponse(res))
+      this._responses = {}
+
+      page.on('response', (res) => {
+        debug('received response for %s', res.url)
+        this._responses[res.url] = res
+      })
 
       return new Proxy(this, proxyHandler)
     }
@@ -87,14 +93,19 @@ module.exports = function (BaseResponse) {
      *
      * @method updateResponse
      *
-     * @param  {Object}       response
-     *
      * @return {void}
      */
     updateResponse (response) {
+      debug('mainframe url is %s', this._page.mainFrame().url())
+      response = response || this._responses[this._page.mainFrame().url()]
       if (!response) {
         return
       }
+
+      /**
+       * Empty responses for next redirection
+       */
+      this._responses = {}
 
       this.status = response.status
       const setCookieHeader = response.headers['set-cookie']
