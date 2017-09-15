@@ -41,8 +41,8 @@ test.group('Browser', (group) => {
     const browser = new Browser(BaseRequest, BaseResponse, puppeteerBrowser, assert)
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
-    server.close()
     await browser.close()
+    server.close()
   })
 })
 
@@ -63,7 +63,7 @@ test.group('Browser Jar', (group) => {
     const browser = new BrowsersJar(BaseRequest, BaseResponse, assert)
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
-    server.close()
     await browser.close()
+    server.close()
   })
 })

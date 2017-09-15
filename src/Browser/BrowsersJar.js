@@ -26,11 +26,14 @@ class BrowsersJar {
    * Launch a new browser
    *
    * @method launch
+   * @async
+   *
+   * @param {Object} [options]
    *
    * @return {Browser}
    */
-  async launch () {
-    const browser = await puppeteer.launch()
+  async launch (options) {
+    const browser = await puppeteer.launch(options)
     return new Browser(this.BaseRequest, this.BaseResponse, browser, this._assert)
   }
 
@@ -47,7 +50,7 @@ class BrowsersJar {
   async visit (url, callback) {
     if (!this.constructor.defaultBrowser) {
       debug('launching new browser')
-      this.constructor.defaultBrowser = await this.launch()
+      this.constructor.defaultBrowser = await this.launch(this.constructor.launchOptions)
     } else {
       debug('re-using existing browser')
     }
@@ -69,4 +72,6 @@ class BrowsersJar {
 }
 
 BrowsersJar.defaultBrowser = null
+BrowsersJar.launchOptions = null
+
 module.exports = BrowsersJar

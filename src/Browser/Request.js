@@ -84,10 +84,13 @@ module.exports = function (BaseRequest, Response) {
      * Make request and returns @ref('BrowserResponse') instance
      *
      * @method end
+     * @async
+     *
+     * @param {Object} options
      *
      * @return {BrowserResponse}
      */
-    async end () {
+    async end (options) {
       const page = await this._browser.newPage()
 
       /**
@@ -108,7 +111,7 @@ module.exports = function (BaseRequest, Response) {
       /**
        * Visiting the defined URL
        */
-      const res = await page.goto(this._url)
+      const res = await page.goto(this._url, options)
 
       /**
        * Execute after hooks
@@ -128,7 +131,6 @@ module.exports = function (BaseRequest, Response) {
        * given response
        */
       await response.updateResponse(res)
-
       return response
     }
   }

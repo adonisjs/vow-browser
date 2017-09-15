@@ -23,10 +23,9 @@ const BaseRequest = helpers.getBaseRequest()
 const BaseResponse = helpers.getBaseResponse()
 
 class Response extends BaseResponse {
-  constructor (page, res, assert) {
-    super(assert, res.headers)
+  constructor (page, assert) {
+    super(assert, {})
     this._page = page
-    this._currentResponse = res
   }
 
   updateResponse (res) {
@@ -35,40 +34,40 @@ class Response extends BaseResponse {
 }
 
 test.group('Request', (group) => {
-  group.beforeEach(() => {
+  group.beforeEach(async () => {
     BaseRequest.hydrate()
     BaseRequest.macro('cookie', function (key, value) {
       this.cookies.push({ key, value })
     })
+    this.browser = await puppeteer.launch()
+  })
+
+  group.afterEach(async () => {
+    await this.browser.close()
+    this.server.close()
   })
 
   test('visit page', async (assert) => {
-    const server = http.createServer((req, res) => {
+    this.server = http.createServer((req, res) => {
       res.end('done')
     }).listen(PORT)
 
-    const browser = await puppeteer.launch()
-
     const Request = RequestManager(BaseRequest, Response)
-    const request = new Request(browser, BASE_URL)
+    const request = new Request(this.browser, BASE_URL)
 
     const res = await request.end()
 
     assert.instanceOf(res, Response)
     assert.equal(res._currentResponse.status, 200)
-
-    server.close()
   })
 
   test('set request header', async (assert) => {
-    const server = http.createServer((req, res) => {
+    this.server = http.createServer((req, res) => {
       res.end(req.headers['content-type'])
     }).listen(PORT)
 
-    const browser = await puppeteer.launch()
-
     const Request = RequestManager(BaseRequest, Response)
-    const request = new Request(browser, BASE_URL)
+    const request = new Request(this.browser, BASE_URL)
     request.header('content-type', 'application/json')
 
     const res = await request.end()
@@ -76,19 +75,15 @@ test.group('Request', (group) => {
 
     const text = await res._currentResponse.text()
     assert.equal(text, 'application/json')
-
-    server.close()
   })
 
   test('set request cookies', async (assert) => {
-    const server = http.createServer((req, res) => {
+    this.server = http.createServer((req, res) => {
       res.end(req.headers.cookie)
     }).listen(PORT)
 
-    const browser = await puppeteer.launch()
-
     const Request = RequestManager(BaseRequest, Response)
-    const request = new Request(browser, BASE_URL)
+    const request = new Request(this.browser, BASE_URL)
     request.cookie('name', 'virk')
 
     const res = await request.end()
@@ -96,7 +91,5 @@ test.group('Request', (group) => {
 
     const text = await res._currentResponse.text()
     assert.equal(text, 'name=virk')
-
-    server.close()
   })
 })
