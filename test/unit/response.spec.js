@@ -1193,4 +1193,23 @@ test.group('Assertions', (group) => {
       return window.location.pathname
     }, '/')
   })
+
+  test('assert count of elements', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+        <ul>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      `)
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+    await res.assertCount('ul li', 3)
+  })
 })
