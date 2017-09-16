@@ -1,3 +1,14 @@
+<a name="1.0.2"></a>
+## [1.0.2](https://github.com/adonisjs/vow-browser/compare/v1.0.1...v1.0.2) (2017-09-16)
+
+
+### Features
+
+* **assertions:** add assertCount method ([319fe74](https://github.com/adonisjs/vow-browser/commit/319fe74))
+* **assertions:** add assertEval & assertFn methods ([7d2bf49](https://github.com/adonisjs/vow-browser/commit/7d2bf49))
+
+
+
 <a name="1.0.1"></a>
 ## [1.0.1](https://github.com/adonisjs/vow-browser/compare/v1.0.0...v1.0.1) (2017-09-15)
 
