@@ -687,10 +687,106 @@ class ActionsChain {
     return this
   }
 
+  /**
+   * Assert web page body
+   *
+   * @method assertBody
+   *
+   * @param  {String}   expected
+   *
+   * @chainable
+   */
   assertBody (expected) {
     this._actions.push(async () => {
       const actual = await this._res.getText()
       this._res._assert.equal(actual, expected)
+    })
+    return this
+  }
+
+  /**
+   * Evaluate an element and run assertions around
+   * it
+   *
+   * @method assertEval
+   *
+   * @param  {Selector}   selector
+   * @param  {Function}   fn
+   * @param  {Array}      args
+   * @param  {String}     expected
+   *
+   * @chainable
+   */
+  assertEval (selector, fn, args, expected) {
+    /**
+     * If expected string is not defined, then
+     * use args as the expected string
+     */
+    if (!expected) {
+      expected = args
+      args = []
+    }
+
+    /**
+     * Cast args to array when not an array
+     */
+    args = args instanceof Array === true ? args : [args]
+
+    this._actions.push(async () => {
+      const actual = await this._res._page.$eval(selector, fn, ...args)
+      this._res._assert.deepEqual(actual, expected)
+    })
+    return this
+  }
+
+  /**
+   * Asserts the output of a custom function by
+   * executing it inside browser context.
+   *
+   * @method assertFn
+   *
+   * @param  {Function} fn
+   * @param  {Array}    args
+   * @param  {String}   expected
+   *
+   * @chainable
+   */
+  assertFn (fn, args, expected) {
+    /**
+     * If expected string is not defined, then
+     * use args as the expected string
+     */
+    if (!expected) {
+      expected = args
+      args = []
+    }
+
+    /**
+     * Cast args to array when not an array
+     */
+    args = args instanceof Array === true ? args : [args]
+
+    this._actions.push(async () => {
+      const actual = await this._res._page.evaluate(fn, ...args)
+      this._res._assert.deepEqual(actual, expected)
+    })
+    return this
+  }
+
+  /**
+   * Asser the count of elements available on the page
+   *
+   * @method assertCount
+   *
+   * @param  {Selector}    selector
+   * @param  {Number}    expectedCount
+   *
+   * @chainable
+   */
+  assertCount (selector, expectedCount) {
+    this._actions.push(async () => {
+      const actualCount = await this._res._page.evaluate((s) => document.querySelectorAll(s).length, selector)
+      this._res._assert.equal(actualCount, expectedCount)
     })
     return this
   }

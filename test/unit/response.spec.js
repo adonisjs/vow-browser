@@ -1131,4 +1131,85 @@ test.group('Assertions', (group) => {
     await res
       .assertBody('Hello dude')
   })
+
+  test('assert a custom evaluation', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write('Hello dude')
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res.assertEval('body', (e) => { return e.innerText }, 'Hello dude')
+  })
+
+  test('pass args to evaluation', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write('<input type="text" name="gender-value" value="virk">')
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res.assertEval('[name="gender-value"]', (e, prop) => {
+      return e[prop]
+    }, ['value'], 'virk')
+  })
+
+  test('cast args to array before passing to evaluation', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write('<input type="text" name="gender-value" value="virk">')
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res.assertEval('[name="gender-value"]', (e, prop) => {
+      return e[prop]
+    }, 'value', 'virk')
+  })
+
+  test('assert fn in browser context', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write('<input type="text" name="gender-value" value="virk">')
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res.assertFn(() => {
+      return window.location.pathname
+    }, '/')
+  })
+
+  test('assert count of elements', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+        <ul>
+          <li></li>
+          <li></li>
+          <li></li>
+        </ul>
+      `)
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+    await res.assertCount('ul li', 3)
+  })
 })
