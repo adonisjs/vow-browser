@@ -60,7 +60,7 @@ test.group('Browser Jar', (group) => {
       res.end('done')
     }).listen(PORT)
 
-    const browser = new BrowsersJar(BaseRequest, BaseResponse, assert)
+    const browser = new (BrowsersJar())(BaseRequest, BaseResponse, assert)
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
     await browser.close()
