@@ -730,6 +730,28 @@ test.group('Page interactions', (group) => {
     await fs.remove(path.join(process.cwd(), 'select.png'))
     await fs.remove(path.join(process.cwd(), 'type.png'))
   })
+
+  test('select multiple options', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write(`
+        <select name="lunch" multiple>
+          <option value="chicken_box"> Chicken Box </option>
+          <option value="milk_shake"> Milk Shake </option>
+          <option value="sushi"> Sushi </option>
+        </select>
+      `)
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    await res
+      .select('[name="lunch"]', ['chicken_box', 'milk_shake'])
+      .assertValue('[name="lunch"]', ['chicken_box', 'milk_shake'])
+  })
 })
 
 test.group('Assertions', (group) => {

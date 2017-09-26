@@ -103,13 +103,20 @@ class ActionsChain {
    * @method select
    *
    * @param  {String} selector
-   * @param  {String} value
+   * @param  {String|Array} values
    *
    * @chainable
    */
-  select (selector, value) {
+  select (selector, values) {
+    values = values instanceof Array === true ? values : [values]
     this._actions.push(() => {
-      return this._res._page.$eval(`${selector} [value^="${value}"]`, (e) => (e.selected = true))
+      return this._res._page.$eval(selector, (element, v) => {
+        for (const option of element.options) {
+          if (v.indexOf(option.value) > -1) {
+            option.selected = true
+          }
+        }
+      }, values)
     })
     return this
   }
@@ -493,7 +500,7 @@ class ActionsChain {
   assertAttribute (selector, attribute, expected) {
     this._actions.push(async () => {
       const actual = await this._res.getAttribute(selector, attribute)
-      this._res._assert.equal(actual, expected)
+      this._res._assert.deepEqual(actual, expected)
     })
     return this
   }
@@ -511,7 +518,7 @@ class ActionsChain {
   assertValue (selector, expected) {
     this._actions.push(async () => {
       const actual = await this._res.getValue(selector)
-      this._res._assert.equal(actual, expected)
+      this._res._assert.deepEqual(actual, expected)
     })
     return this
   }
@@ -596,7 +603,7 @@ class ActionsChain {
   assertPath (expected) {
     this._actions.push(() => {
       const actual = this._res.getPath()
-      this._res._assert.equal(actual, expected)
+      this._res._assert.deepEqual(actual, expected)
     })
     return this
   }
@@ -682,7 +689,7 @@ class ActionsChain {
   assertTitle (expected) {
     this._actions.push(async () => {
       const title = await this._res.getTitle()
-      this._res._assert.equal(title, expected)
+      this._res._assert.deepEqual(title, expected)
     })
     return this
   }
@@ -699,7 +706,7 @@ class ActionsChain {
   assertBody (expected) {
     this._actions.push(async () => {
       const actual = await this._res.getText()
-      this._res._assert.equal(actual, expected)
+      this._res._assert.deepEqual(actual, expected)
     })
     return this
   }
@@ -786,7 +793,7 @@ class ActionsChain {
   assertCount (selector, expectedCount) {
     this._actions.push(async () => {
       const actualCount = await this._res._page.evaluate((s) => document.querySelectorAll(s).length, selector)
-      this._res._assert.equal(actualCount, expectedCount)
+      this._res._assert.deepEqual(actualCount, expectedCount)
     })
     return this
   }
