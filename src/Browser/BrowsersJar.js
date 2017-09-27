@@ -51,12 +51,15 @@ module.exports = function (launchOptions) {
      * @return {Browser}
      */
     async launch (options) {
-      options = options || {}
-      if (options.executablePath) {
-        options.executablePath = getProperPath(options.executablePath)
+      const clonedOptions = Object.assign({}, {
+        executablePath: process.env.CHROMIUM_PATH || undefined
+      }, options)
+
+      if (clonedOptions.executablePath) {
+        clonedOptions.executablePath = getProperPath(clonedOptions.executablePath)
       }
 
-      const browser = await puppeteer.launch(options)
+      const browser = await puppeteer.launch(clonedOptions)
       return new Browser(this.BaseRequest, this.BaseResponse, browser, this._assert)
     }
 
