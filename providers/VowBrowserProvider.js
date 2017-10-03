@@ -16,20 +16,20 @@ class BrowserProvider extends ServiceProvider {
     this.app.bind('Test/Browser', () => {
       const BrowsersJarManager = require('../src/Browser/BrowsersJar')
 
-      return function ({ Context, Request, Response }, launchOptions) {
+      return function (Suite, launchOptions) {
         const BrowsersJar = BrowsersJarManager(launchOptions)
 
         /**
          * Bind browser to the text context
          */
-        Context.getter('browser', function () {
-          return new BrowsersJar(Request, Response, this.assert)
+        Suite.Context.getter('browser', function () {
+          return new BrowsersJar(Suite.Request, Suite.Response, this.assert)
         }, true)
 
         /**
          * After each suite close the browser
          */
-        Context.after(async () => {
+        Suite.after(async () => {
           await BrowsersJar.close()
         })
       }
