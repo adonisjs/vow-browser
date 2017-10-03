@@ -1,3 +1,18 @@
+<a name="1.0.3"></a>
+## [1.0.3](https://github.com/adonisjs/vow-browser/compare/v1.0.2...v1.0.3) (2017-10-03)
+
+
+### Bug Fixes
+
+* **select:** select multiple should work as expected ([92dabea](https://github.com/adonisjs/vow-browser/commit/92dabea))
+
+
+### Features
+
+* **browser:** pull right file from executablePath on mac ([e3ff464](https://github.com/adonisjs/vow-browser/commit/e3ff464))
+
+
+
 <a name="1.0.2"></a>
 ## [1.0.2](https://github.com/adonisjs/vow-browser/compare/v1.0.1...v1.0.2) (2017-09-16)
 

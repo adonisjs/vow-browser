@@ -1,6 +1,6 @@
 {
   "name": "@adonisjs/vow-browser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Browser client on top of puppeteer for Adonisjs ",
   "main": "index.js",
   "scripts": {
