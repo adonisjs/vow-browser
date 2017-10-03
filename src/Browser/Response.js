@@ -227,6 +227,19 @@ module.exports = function (BaseResponse) {
         }
 
         /**
+         * If node is an select multiple elem
+         */
+        if (nodes[0].type === 'select-multiple') {
+          const selectedOptions = []
+          for (const item of nodes[0].options) {
+            if (item.selected) {
+              selectedOptions.push(item.value)
+            }
+          }
+          return selectedOptions
+        }
+
+        /**
          * Otherwise return first node value
          */
         return nodes[0].value
