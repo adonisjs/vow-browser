@@ -1,3 +1,13 @@
+<a name="1.0.4"></a>
+## [1.0.4](https://github.com/adonisjs/vow-browser/compare/v1.0.3...v1.0.4) (2017-10-04)
+
+
+### Bug Fixes
+
+* **provider:** call `after` method on suite over context ([efe7060](https://github.com/adonisjs/vow-browser/commit/efe7060))
+
+
+
 <a name="1.0.3"></a>
 ## [1.0.3](https://github.com/adonisjs/vow-browser/compare/v1.0.2...v1.0.3) (2017-10-03)
 
