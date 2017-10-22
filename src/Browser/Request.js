@@ -106,7 +106,7 @@ module.exports = function (BaseRequest, Response) {
       /**
        * Set cookies if any
        */
-      this._setCookies(page)
+      await this._setCookies(page)
 
       /**
        * Visiting the defined URL
