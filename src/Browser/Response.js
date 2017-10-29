@@ -132,7 +132,9 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getText (selector) {
-      return selector ? this._page.$eval(selector, (e) => e.innerText) : this._page.plainText()
+      return selector ? this._page.$eval(selector, (e) => e.innerText) : this._page.evaluate(() => {
+        return document.body.innerText
+      })
     }
 
     /**

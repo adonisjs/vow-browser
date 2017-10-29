@@ -85,14 +85,13 @@ class ActionsChain {
    *
    * @param  {String} selector
    * @param  {String} text
+   * @param  {Object} [options = {}]
    *
    * @chainable
    */
-  type (selector, text) {
+  type (selector, text, options = {}) {
     this._actions.push(() => {
-      return this._res._page.focus(selector).then(() => {
-        return this._res._page.type(String(text))
-      })
+      return this._res._page.type(selector, String(text), options)
     })
     return this
   }
