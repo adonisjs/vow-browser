@@ -1,3 +1,13 @@
+<a name="1.0.5"></a>
+## [1.0.5](https://github.com/adonisjs/vow-browser/compare/v1.0.4...v1.0.5) (2017-10-30)
+
+
+### Bug Fixes
+
+* **cookie:** await the promise (#2) ([be9f019](https://github.com/adonisjs/vow-browser/commit/be9f019))
+
+
+
 <a name="1.0.4"></a>
 ## [1.0.4](https://github.com/adonisjs/vow-browser/compare/v1.0.3...v1.0.4) (2017-10-04)
 
