@@ -830,6 +830,20 @@ class ActionsChain {
   catch (reject) {
     return this.then(undefined, reject)
   }
+
+  /**
+   * Set Viewport
+   *
+   * @method setViewport
+   *
+   * @param  {Object}   [viewport]
+   *
+   * @chainable
+   */
+  setViewport (viewport) {
+    this._actions.push(() => this._res._page.setViewport(viewport))
+    return this
+  }
 }
 
 module.exports = ActionsChain
