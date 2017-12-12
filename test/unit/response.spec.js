@@ -1234,4 +1234,21 @@ test.group('Assertions', (group) => {
     const res = await request.end()
     await res.assertCount('ul li', 3)
   })
+
+  test('assert viewport set correctly', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.writeHead(200, { 'content-type': 'text/html' })
+      res.write('Hello world')
+      res.end()
+    }).listen(PORT)
+
+    const Request = RequestManager(BaseRequest, ResponseManager(BaseResponse))
+    const request = new Request(this.browser, BASE_URL, assert)
+    const res = await request.end()
+
+    const viewport = { width: 1200, height: 800 }
+    await res.setViewport(viewport)
+
+    assert.equal(res._page.viewport(), viewport)
+  })
 })
