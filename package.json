@@ -12,6 +12,13 @@
   },
   "author": "",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/adonisjs/vow-browser"
+  },
+  "bugs": {
+    "url": "https://github.com/adonisjs/vow-browser/issues"
+  },
   "devDependencies": {
     "@adonisjs/fold": "^4.0.5",
     "@adonisjs/sink": "^1.0.13",
