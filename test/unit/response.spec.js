@@ -22,6 +22,10 @@ const helpers = require('../helpers')
 const PORT = 3333
 const BASE_URL = `http://localhost:${PORT}`
 
+// test.configure({
+//   timeout: 0
+// })
+
 const BaseRequest = helpers.getBaseRequest()
 const BaseResponse = helpers.getBaseResponse()
 
@@ -53,7 +57,6 @@ test.group('Response', (group) => {
     const request = new Request(this.browser, BASE_URL)
 
     const res = await request.end()
-
     assert.equal(res.status, 200)
   })
 

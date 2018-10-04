@@ -10,11 +10,9 @@
 */
 
 const test = require('japa')
-const puppeteer = require('puppeteer')
 const http = require('http')
 
 const Browser = require('../../src/Browser')
-const BrowsersJar = require('../../src/Browser/BrowsersJar')
 const helpers = require('../helpers')
 
 const PORT = 3333
@@ -37,32 +35,25 @@ test.group('Browser', (group) => {
       res.end('done')
     }).listen(PORT)
 
-    const puppeteerBrowser = await puppeteer.launch()
-    const browser = new Browser(BaseRequest, BaseResponse, puppeteerBrowser, assert)
+    const browser = new Browser(BaseRequest, BaseResponse, assert)
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
     await browser.close()
     server.close()
   })
-})
 
-test.group('Browser Jar', (group) => {
-  group.beforeEach(() => {
-    BaseRequest.hydrate()
-    BaseResponse.hydrate()
-    BaseRequest.macro('cookie', function (key, value) {
-      this.cookies.push({ key, value })
-    })
-  })
-
-  test('visit a url', async (assert) => {
+  test('calling visit twice must open 2 pages', async (assert) => {
     const server = http.createServer((req, res) => {
       res.end('done')
     }).listen(PORT)
 
-    const browser = new (BrowsersJar())(BaseRequest, BaseResponse, assert)
+    const browser = new Browser(BaseRequest, BaseResponse, assert)
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
+
+    const page1 = await browser.visit(BASE_URL)
+    page1.assertStatus(200)
+
     await browser.close()
     server.close()
   })
