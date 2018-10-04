@@ -72,14 +72,28 @@ module.exports = function (BaseResponse) {
       this.page = page
 
       /**
-       * Response is updated on every navigation
+       * Storing initial response
        */
       this._response = null
+
+      /**
+       * Update the response
+       */
       this.updateResponse(res)
 
-      page.on('response', (res) => {
-        debug('received response for %s', res.url)
-        this.updateResponse(res)
+      /**
+       * Listen for all subsequent responses
+       */
+      this.page.on('response', (res) => {
+        debug('received response for %s', res.url())
+
+        /**
+         * Only update response when url is same as the main page
+         * url
+         */
+        if (res.url() === this.page.mainFrame().url()) {
+          this.updateResponse(res)
+        }
       })
 
       return new Proxy(this, proxyHandler)
@@ -106,7 +120,8 @@ module.exports = function (BaseResponse) {
      * @return {void}
      */
     updateResponse (response) {
-      debug('mainframe url is %s', this.page.mainFrame().url())
+      debug('consuming response for %s', response.url())
+
       this._response = response
 
       /**
