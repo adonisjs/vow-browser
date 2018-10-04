@@ -3,6 +3,11 @@
   "version": "1.0.6",
   "description": "Browser client on top of puppeteer for Adonisjs ",
   "main": "index.js",
+  "files": [
+    "src",
+    "providers",
+    "instructions.md"
+  ],
   "scripts": {
     "mrm": "mrm --preset=@adonisjs/mrm-preset",
     "pretest": "npm run lint",
