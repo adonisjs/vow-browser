@@ -52,7 +52,8 @@ class Browser {
    */
   async launch (options) {
     const clonedOptions = Object.assign({}, {
-      executablePath: process.env.CHROMIUM_PATH || undefined
+      executablePath: process.env.CHROMIUM_PATH || undefined,
+      args: process.env.TRAVIS ? ['--no-sandbox'] : []
     }, options)
 
     if (clonedOptions.executablePath) {
