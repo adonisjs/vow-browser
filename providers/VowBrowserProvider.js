@@ -14,23 +14,21 @@ const { ServiceProvider } = require('@adonisjs/fold')
 class BrowserProvider extends ServiceProvider {
   register () {
     this.app.bind('Test/Browser', () => {
-      const BrowsersJarManager = require('../src/Browser/BrowsersJar')
+      const BrowsersJar = require('../src/Browser/BrowsersJar')
 
       return function (Suite, launchOptions) {
-        const BrowsersJar = BrowsersJarManager(launchOptions)
-
         /**
          * Bind browser to the text context
          */
         Suite.Context.getter('browser', function () {
-          return new BrowsersJar(Suite.Request, Suite.Response, this.assert)
+          return BrowsersJar.newBrowser(Suite.Request, Suite.Response, this.assert, launchOptions)
         }, true)
 
         /**
-         * After each suite close the browser
+         * After each test close the browser
          */
-        Suite.after(async () => {
-          await BrowsersJar.close()
+        Suite.afterEach(async () => {
+          await BrowsersJar.closeExistingBrowsers()
         })
       }
     })

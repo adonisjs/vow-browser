@@ -42,7 +42,7 @@ class ActionsChain {
    * @chainable
    */
   click (selector, options) {
-    this._actions.push(() => this._res._page.click(selector, options))
+    this._actions.push(() => this._res.page.click(selector, options))
     return this
   }
 
@@ -58,7 +58,7 @@ class ActionsChain {
    */
   doubleClick (selector, options) {
     const clonedOptions = Object.assign({}, options, { clickCount: 2 })
-    this._actions.push(() => this._res._page.click(selector, clonedOptions))
+    this._actions.push(() => this._res.page.click(selector, clonedOptions))
     return this
   }
 
@@ -74,7 +74,7 @@ class ActionsChain {
    */
   rightClick (selector, options) {
     const clonedOptions = Object.assign({}, options, { button: 'right' })
-    this._actions.push(() => this._res._page.click(selector, clonedOptions))
+    this._actions.push(() => this._res.page.click(selector, clonedOptions))
     return this
   }
 
@@ -91,7 +91,7 @@ class ActionsChain {
    */
   type (selector, text, options = {}) {
     this._actions.push(() => {
-      return this._res._page.type(selector, String(text), options)
+      return this._res.page.type(selector, String(text), options)
     })
     return this
   }
@@ -109,7 +109,7 @@ class ActionsChain {
   select (selector, values) {
     values = values instanceof Array === true ? values : [values]
     this._actions.push(() => {
-      return this._res._page.$eval(selector, (element, v) => {
+      return this._res.page.$eval(selector, (element, v) => {
         for (const option of element.options) {
           if (v.indexOf(option.value) > -1) {
             option.selected = true
@@ -131,7 +131,7 @@ class ActionsChain {
    */
   check (selector) {
     this._actions.push(() => {
-      return this._res._page.$eval(selector, (e) => (e.checked = true))
+      return this._res.page.$eval(selector, (e) => (e.checked = true))
     })
     return this
   }
@@ -147,7 +147,7 @@ class ActionsChain {
    */
   uncheck (selector) {
     this._actions.push(() => {
-      return this._res._page.$eval(selector, (e) => (e.checked = false))
+      return this._res.page.$eval(selector, (e) => (e.checked = false))
     })
     return this
   }
@@ -164,7 +164,7 @@ class ActionsChain {
    */
   radio (selector, value) {
     this._actions.push(() => {
-      return this._res._page.$eval(`${selector}[value^="${value}"]`, (e) => (e.checked = true))
+      return this._res.page.$eval(`${selector}[value^="${value}"]`, (e) => (e.checked = true))
     })
     return this
   }
@@ -180,7 +180,7 @@ class ActionsChain {
    */
   submitForm (selector) {
     this._actions.push(() => {
-      return this._res._page.$eval(selector, (e) => e.submit())
+      return this._res.page.$eval(selector, (e) => e.submit())
     })
     return this
   }
@@ -195,7 +195,7 @@ class ActionsChain {
    * @chainable
    */
   evaluate (fn) {
-    this._actions.push(() => this._res._page.evaluate(fn))
+    this._actions.push(() => this._res.page.evaluate(fn))
     return this
   }
 
@@ -209,7 +209,7 @@ class ActionsChain {
    * @chainable
    */
   $eval (fn) {
-    this._actions.push(() => this._res._page.$eval(fn))
+    this._actions.push(() => this._res.page.$eval(fn))
     return this
   }
 
@@ -224,7 +224,7 @@ class ActionsChain {
    * @chainable
    */
   waitFor (selectorOrFunctionOrTimeout, options) {
-    this._actions.push(() => this._res._page.waitFor(selectorOrFunctionOrTimeout, options))
+    this._actions.push(() => this._res.page.waitFor(selectorOrFunctionOrTimeout, options))
     return this
   }
 
@@ -267,7 +267,7 @@ class ActionsChain {
    */
   waitUntilMissing (selector, options) {
     this._actions.push(() => {
-      return this._res._page.waitForFunction((s) => {
+      return this._res.page.waitForFunction((s) => {
         return !document.querySelector(s)
       }, options, selector)
     })
@@ -281,11 +281,20 @@ class ActionsChain {
    *
    * @chainable
    */
-  waitForNavigation () {
-    this._actions.push(async () => {
-      const response = await this._res._page.waitForNavigation()
-      this._res.updateResponse(response)
-    })
+  waitForNavigation (callback) {
+    const lastAction = this._actions[this._actions.length - 1]
+    if (!lastAction) {
+      throw new Error('waitForNavigation must be called right after the action that causes indirect redirection')
+    }
+
+    /**
+     * Here we assume that the action before waitForNavigation is the one that
+     * causes indirect redirection.
+     */
+    this._actions[this._actions.length - 1] = () => {
+      return Promise.all([lastAction(), this._res.page.waitForNavigation()])
+    }
+
     return this
   }
 
@@ -387,7 +396,7 @@ class ActionsChain {
    * @chainable
    */
   clear (selector) {
-    this._actions.push(() => this._res._page.$eval(selector, (e) => (e.value = '')))
+    this._actions.push(() => this._res.page.$eval(selector, (e) => (e.value = '')))
     return this
   }
 
@@ -429,7 +438,7 @@ class ActionsChain {
    */
   screenshot (path, options) {
     const clonedOptions = Object.assign({}, options, { path })
-    this._actions.push(() => this._res._page.screenshot(clonedOptions))
+    this._actions.push(() => this._res.page.screenshot(clonedOptions))
     return this
   }
 
@@ -739,7 +748,7 @@ class ActionsChain {
     args = args instanceof Array === true ? args : [args]
 
     this._actions.push(async () => {
-      const actual = await this._res._page.$eval(selector, fn, ...args)
+      const actual = await this._res.page.$eval(selector, fn, ...args)
       this._res._assert.deepEqual(actual, expected)
     })
     return this
@@ -773,7 +782,7 @@ class ActionsChain {
     args = args instanceof Array === true ? args : [args]
 
     this._actions.push(async () => {
-      const actual = await this._res._page.evaluate(fn, ...args)
+      const actual = await this._res.page.evaluate(fn, ...args)
       this._res._assert.deepEqual(actual, expected)
     })
     return this
@@ -791,7 +800,7 @@ class ActionsChain {
    */
   assertCount (selector, expectedCount) {
     this._actions.push(async () => {
-      const actualCount = await this._res._page.evaluate((s) => document.querySelectorAll(s).length, selector)
+      const actualCount = await this._res.page.evaluate((s) => document.querySelectorAll(s).length, selector)
       this._res._assert.deepEqual(actualCount, expectedCount)
     })
     return this

@@ -24,6 +24,11 @@ module.exports = function (BaseRequest, Response) {
       this._url = url
       this._headers = {}
       this._assert = assert
+
+      /**
+       * Access to the request page. Added when `end` method is called
+       */
+      this.page = null
     }
 
     /**
@@ -91,7 +96,7 @@ module.exports = function (BaseRequest, Response) {
      * @return {BrowserResponse}
      */
     async end (options) {
-      const page = await this._browser.newPage()
+      this.page = await this._browser.newPage()
 
       /**
        * Execute before hooks
@@ -101,17 +106,17 @@ module.exports = function (BaseRequest, Response) {
       /**
        * Set headers if any
        */
-      this._setHeaders(page)
+      this._setHeaders(this.page)
 
       /**
        * Set cookies if any
        */
-      await this._setCookies(page)
+      await this._setCookies(this.page)
 
       /**
        * Visiting the defined URL
        */
-      const res = await page.goto(this._url, options)
+      const res = await this.page.goto(this._url, options)
 
       /**
        * Execute after hooks
@@ -123,15 +128,7 @@ module.exports = function (BaseRequest, Response) {
        *
        * @type {BrowserResponse}
        */
-      const response = new Response(page, this._assert)
-
-      /**
-       * Updating the response to `res` will pull the current
-       * response body and set `currentResponse` as the
-       * given response
-       */
-      await response.updateResponse(res)
-      return response
+      return new Response(this.page, this._assert, res)
     }
   }
   return BrowserRequest

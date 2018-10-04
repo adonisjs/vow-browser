@@ -55,7 +55,7 @@ module.exports = function (BaseResponse) {
    * @class BrowserResponse
    */
   class BrowserResponse extends BaseResponse {
-    constructor (page, assert) {
+    constructor (page, assert, res) {
       /**
        * The base response class needs headers to be passed
        * inside constructor.
@@ -68,12 +68,32 @@ module.exports = function (BaseResponse) {
        * each response.
        */
       super(assert, {})
-      this._page = page
-      this._responses = {}
 
-      page.on('response', (res) => {
-        debug('received response for %s', res.url)
-        this._responses[res.url] = res
+      this.page = page
+
+      /**
+       * Storing initial response
+       */
+      this._response = null
+
+      /**
+       * Update the response
+       */
+      this.updateResponse(res)
+
+      /**
+       * Listen for all subsequent responses
+       */
+      this.page.on('response', (res) => {
+        debug('received response for %s', res.url())
+
+        /**
+         * Only update response when url is same as the main page
+         * url
+         */
+        if (res.url() === this.page.mainFrame().url()) {
+          this.updateResponse(res)
+        }
       })
 
       return new Proxy(this, proxyHandler)
@@ -100,24 +120,29 @@ module.exports = function (BaseResponse) {
      * @return {void}
      */
     updateResponse (response) {
-      debug('mainframe url is %s', this._page.mainFrame().url())
-      response = response || this._responses[this._page.mainFrame().url()]
-      if (!response) {
-        return
+      debug('consuming response for %s', response.url())
+
+      this._response = response
+
+      /**
+       * Set new status
+       */
+      this.status = response.status()
+
+      const headers = response.headers()
+
+      /**
+       * Parses cookies and split them to array
+       */
+      const setCookieHeader = headers['set-cookie']
+      if (typeof (setCookieHeader) === 'string' && setCookieHeader) {
+        headers['set-cookie'] = setCookieHeader.split('\n')
       }
 
       /**
-       * Empty responses for next redirection
+       * Update headers
        */
-      this._responses = {}
-
-      this.status = response.status
-      const setCookieHeader = response.headers['set-cookie']
-      if (typeof (setCookieHeader) === 'string' && setCookieHeader) {
-        response.headers['set-cookie'] = setCookieHeader.split('\n')
-      }
-
-      this.updateHeaders(response.headers)
+      this.updateHeaders(headers)
     }
 
     /**
@@ -132,7 +157,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getText (selector) {
-      return selector ? this._page.$eval(selector, (e) => e.innerText) : this._page.evaluate(() => {
+      return selector ? this.page.$eval(selector, (e) => e.innerText) : this.page.evaluate(() => {
         return document.body.innerText
       })
     }
@@ -149,7 +174,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getHtml (selector) {
-      return selector ? this._page.$eval(selector, (e) => e.innerHTML) : this._page.content()
+      return selector ? this.page.$eval(selector, (e) => e.innerHTML) : this.page.content()
     }
 
     /**
@@ -161,7 +186,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getTitle () {
-      return this._page.title()
+      return this.page.title()
     }
 
     /**
@@ -176,7 +201,7 @@ module.exports = function (BaseResponse) {
      * @return {Boolean}
      */
     isChecked (selector) {
-      return this._page.$eval(selector, (e) => e.checked)
+      return this.page.$eval(selector, (e) => e.checked)
     }
 
     /**
@@ -190,7 +215,7 @@ module.exports = function (BaseResponse) {
      * @return {Boolean}
      */
     isVisible (selector) {
-      return this._page.$eval(selector, (e) => {
+      return this.page.$eval(selector, (e) => {
         const styles = document.defaultView.getComputedStyle(e, null)
         return styles['opacity'] !== '0' && styles['display'] !== 'none' && styles['visibility'] !== 'hidden'
       })
@@ -207,7 +232,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getValue (selector) {
-      return this._page.evaluate((s) => {
+      return this.page.evaluate((s) => {
         const nodes = document.querySelectorAll(s)
         if (!nodes.length) {
           throw new Error('Node not found')
@@ -260,7 +285,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getAttribute (selector, attribute) {
-      return this._page.$eval(selector, (e, attr) => e.getAttribute(attr), attribute)
+      return this.page.$eval(selector, (e, attr) => e.getAttribute(attr), attribute)
     }
 
     /**
@@ -271,7 +296,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getPath () {
-      return new URL(this._page.url()).pathname
+      return new URL(this.page.url()).pathname
     }
 
     /**
@@ -282,7 +307,7 @@ module.exports = function (BaseResponse) {
      * @return {String}
      */
     getQueryParams () {
-      const params = new URL(this._page.url()).searchParams
+      const params = new URL(this.page.url()).searchParams
       const paramsHash = {}
 
       for (const [name, value] of params) {
@@ -316,7 +341,7 @@ module.exports = function (BaseResponse) {
      * @return {Object}
      */
     getAttributes (selector) {
-      return this._page.$eval(selector, (e, attr) => {
+      return this.page.$eval(selector, (e, attr) => {
         const attrsMap = e.attributes
         const attrs = {}
         for (let i = 0; i < attrsMap.length; i++) {
@@ -339,7 +364,7 @@ module.exports = function (BaseResponse) {
      * @return {Boolean}
      */
     hasElement (selector) {
-      return this._page.evaluate((s) => !!document.querySelector(s), selector)
+      return this.page.evaluate((s) => !!document.querySelector(s), selector)
     }
 
     /**
@@ -353,7 +378,7 @@ module.exports = function (BaseResponse) {
      * @return {Object}
      */
     getElement (selector) {
-      return this._page.$(selector)
+      return this.page.$(selector)
     }
 
     /**
@@ -377,7 +402,7 @@ module.exports = function (BaseResponse) {
      * @return {void}
      */
     close () {
-      return this._page.close()
+      return this.page.close()
     }
 
     /**

@@ -23,12 +23,9 @@ const BaseRequest = helpers.getBaseRequest()
 const BaseResponse = helpers.getBaseResponse()
 
 class Response extends BaseResponse {
-  constructor (page, assert) {
+  constructor (page, assert, res) {
     super(assert, {})
     this._page = page
-  }
-
-  updateResponse (res) {
     this._currentResponse = res
   }
 }
@@ -42,9 +39,9 @@ test.group('Request', (group) => {
     this.browser = await puppeteer.launch()
   })
 
-  group.afterEach(async () => {
+  group.afterEach(async (done) => {
     await this.browser.close()
-    this.server.close()
+    this.server.close(done)
   })
 
   test('visit page', async (assert) => {
@@ -58,7 +55,7 @@ test.group('Request', (group) => {
     const res = await request.end()
 
     assert.instanceOf(res, Response)
-    assert.equal(res._currentResponse.status, 200)
+    assert.equal(res._currentResponse.status(), 200)
   })
 
   test('set request header', async (assert) => {
