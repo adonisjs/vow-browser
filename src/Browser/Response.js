@@ -81,21 +81,6 @@ module.exports = function (BaseResponse) {
        */
       this.updateResponse(res)
 
-      /**
-       * Listen for all subsequent responses
-       */
-      this.page.on('response', (res) => {
-        debug('received response for %s', res.url())
-
-        /**
-         * Only update response when url is same as the main page
-         * url
-         */
-        if (res.url() === this.page.mainFrame().url()) {
-          this.updateResponse(res)
-        }
-      })
-
       return new Proxy(this, proxyHandler)
     }
 
@@ -121,7 +106,6 @@ module.exports = function (BaseResponse) {
      */
     updateResponse (response) {
       debug('consuming response for %s', response.url())
-
       this._response = response
 
       /**

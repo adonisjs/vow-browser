@@ -1,3 +1,18 @@
+<a name="1.0.7"></a>
+## [1.0.7](https://github.com/adonisjs/vow-browser/compare/v1.0.6...v1.0.7) (2018-10-04)
+
+
+### Bug Fixes
+
+* **response:** improve the way of tracking responses for frame navigation ([c407314](https://github.com/adonisjs/vow-browser/commit/c407314))
+
+
+### Features
+
+* **browser:** detect travis and run in no-sandbox mode automatically ([2cd48af](https://github.com/adonisjs/vow-browser/commit/2cd48af))
+
+
+
 <a name="1.0.6"></a>
 ## [1.0.6](https://github.com/adonisjs/vow-browser/compare/v1.0.4...v1.0.6) (2018-10-04)
 
