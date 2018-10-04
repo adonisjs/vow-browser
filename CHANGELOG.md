@@ -1,3 +1,20 @@
+<a name="1.0.6"></a>
+## [1.0.6](https://github.com/adonisjs/vow-browser/compare/v1.0.4...v1.0.6) (2018-10-04)
+
+
+### Bug Fixes
+
+* **BrowsersJar:** fix typo of passing Response over Request ([e0924aa](https://github.com/adonisjs/vow-browser/commit/e0924aa))
+* **cookie:** await the promise ([#2](https://github.com/adonisjs/vow-browser/issues/2)) ([be9f019](https://github.com/adonisjs/vow-browser/commit/be9f019))
+* **response:** only consume mainFrame responses ([aea478b](https://github.com/adonisjs/vow-browser/commit/aea478b))
+
+
+### Features
+
+* make puppeteer page a public property on request and response ([8bf5101](https://github.com/adonisjs/vow-browser/commit/8bf5101))
+
+
+
 <a name="1.0.5"></a>
 ## [1.0.5](https://github.com/adonisjs/vow-browser/compare/v1.0.4...v1.0.5) (2017-10-30)
 
