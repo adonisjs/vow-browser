@@ -22,16 +22,12 @@ const helpers = require('../helpers')
 const PORT = 3333
 const BASE_URL = `http://localhost:${PORT}`
 
-// test.configure({
-//   timeout: 0
-// })
-
 const BaseRequest = helpers.getBaseRequest()
 const BaseResponse = helpers.getBaseResponse()
 
 test.group('Response', (group) => {
   group.beforeEach(async () => {
-    this.browser = await puppeteer.launch({ headless: true })
+    this.browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     this.server = null
   })
 
@@ -145,7 +141,7 @@ test.group('Response', (group) => {
 
 test.group('Page interactions', (group) => {
   group.beforeEach(async () => {
-    this.browser = await puppeteer.launch()
+    this.browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     this.server = null
   })
 
@@ -759,7 +755,7 @@ test.group('Page interactions', (group) => {
 
 test.group('Assertions', (group) => {
   group.beforeEach(async () => {
-    this.browser = await puppeteer.launch()
+    this.browser = await puppeteer.launch({ args: ['--no-sandbox'] })
     this.server = null
   })
 
@@ -1252,6 +1248,6 @@ test.group('Assertions', (group) => {
     const viewport = { width: 1200, height: 800 }
     await res.setViewport(viewport)
 
-    assert.equal(res._page.viewport(), viewport)
+    assert.equal(res.page.viewport(), viewport)
   })
 })

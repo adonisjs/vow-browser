@@ -36,7 +36,7 @@ test.group('Request', (group) => {
     BaseRequest.macro('cookie', function (key, value) {
       this.cookies.push({ key, value })
     })
-    this.browser = await puppeteer.launch()
+    this.browser = await puppeteer.launch({ args: ['--no-sandbox'] })
   })
 
   group.afterEach(async (done) => {

@@ -40,7 +40,7 @@ test.group('Browser', (group) => {
       res.end('done')
     }).listen(PORT)
 
-    const browser = new Browser(BaseRequest, BaseResponse, assert)
+    const browser = new Browser(BaseRequest, BaseResponse, assert, { args: ['--no-sandbox'] })
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
     await browser.close()
@@ -51,7 +51,7 @@ test.group('Browser', (group) => {
       res.end('done')
     }).listen(PORT)
 
-    const browser = new Browser(BaseRequest, BaseResponse, assert)
+    const browser = new Browser(BaseRequest, BaseResponse, assert, { args: ['--no-sandbox'] })
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
 

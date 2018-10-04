@@ -291,8 +291,9 @@ class ActionsChain {
      * Here we assume that the action before waitForNavigation is the one that
      * causes indirect redirection.
      */
-    this._actions[this._actions.length - 1] = () => {
-      return Promise.all([lastAction(), this._res.page.waitForNavigation()])
+    this._actions[this._actions.length - 1] = async () => {
+      const output = await Promise.all([lastAction(), this._res.page.waitForNavigation()])
+      this._res.updateResponse(output[1])
     }
 
     return this
@@ -850,7 +851,7 @@ class ActionsChain {
    * @chainable
    */
   setViewport (viewport) {
-    this._actions.push(() => this._res._page.setViewport(viewport))
+    this._actions.push(() => this._res.page.setViewport(viewport))
     return this
   }
 }
