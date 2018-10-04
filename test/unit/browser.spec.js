@@ -28,10 +28,15 @@ test.group('Browser', (group) => {
     BaseRequest.macro('cookie', function (key, value) {
       this.cookies.push({ key, value })
     })
+    this.server = null
+  })
+
+  group.afterEach(async (done) => {
+    this.server.close(done)
   })
 
   test('visit a url', async (assert) => {
-    const server = http.createServer((req, res) => {
+    this.server = http.createServer((req, res) => {
       res.end('done')
     }).listen(PORT)
 
@@ -39,11 +44,10 @@ test.group('Browser', (group) => {
     const page = await browser.visit(BASE_URL)
     page.assertStatus(200)
     await browser.close()
-    server.close()
   })
 
   test('calling visit twice must open 2 pages', async (assert) => {
-    const server = http.createServer((req, res) => {
+    this.server = http.createServer((req, res) => {
       res.end('done')
     }).listen(PORT)
 
@@ -55,6 +59,5 @@ test.group('Browser', (group) => {
     page1.assertStatus(200)
 
     await browser.close()
-    server.close()
   })
 })

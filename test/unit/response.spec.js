@@ -35,9 +35,9 @@ test.group('Response', (group) => {
     this.server = null
   })
 
-  group.afterEach(async () => {
+  group.afterEach(async (done) => {
     await this.browser.close()
-    this.server.close()
+    this.server.close(done)
   })
 
   group.beforeEach(() => {

@@ -39,9 +39,9 @@ test.group('Request', (group) => {
     this.browser = await puppeteer.launch()
   })
 
-  group.afterEach(async () => {
+  group.afterEach(async (done) => {
     await this.browser.close()
-    this.server.close()
+    this.server.close(done)
   })
 
   test('visit page', async (assert) => {
