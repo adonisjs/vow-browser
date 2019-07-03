@@ -14,7 +14,9 @@
     "test:local": "japa --timeout=0",
     "test": "node japaFile.js",
     "commit": "git-cz",
-    "lint": "standard"
+    "lint": "standard",
+    "snyk-protect": "snyk protect",
+    "prepublish": "npm run snyk-protect"
   },
   "author": "",
   "license": "MIT",
@@ -44,7 +46,8 @@
     "debug": "^4.0.1",
     "lodash": "^4.17.11",
     "p-series": "^1.1.0",
-    "puppeteer": "^1.8.0"
+    "puppeteer": "^1.8.0",
+    "snyk": "^1.189.0"
   },
   "config": {
     "commitizen": {
@@ -55,5 +58,6 @@
     "exclude": [
       "test"
     ]
-  }
+  },
+  "snyk": true
 }
