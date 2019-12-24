@@ -113,7 +113,9 @@ class Browser {
    * @return {void}
    */
   close () {
-    return this.puppeteerBrowser.close()
+    if (this.puppeteerBrowser) {
+      return this.puppeteerBrowser.close()
+    }
   }
 }
 
