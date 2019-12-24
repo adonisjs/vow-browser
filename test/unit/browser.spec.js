@@ -60,4 +60,15 @@ test.group('Browser', (group) => {
 
     await browser.close()
   })
+
+  // VowBrowserProvider will call close in the afterEach, but
+  // in the case of an error in the test, that might occur *before*
+  // Browser#visit or Browser#launch.
+  test('its ok to close before launch', async (assert) => {
+    this.server = http.createServer((req, res) => {
+      res.end('done')
+    }).listen(PORT)
+    const browser = new Browser(BaseRequest, BaseResponse, assert)
+    await browser.close()
+  })
 })
